@@ -21,7 +21,7 @@ class ListItems extends Component {
         key="-1"
         style={this.props.match.path === '/robot_chat' ? { backgroundColor: '#f5f5f5' } : {}}
       >
-        <Link to="/robot_chat">
+        <Link to="/robot_chat" className="robotItem">
           <UserAvatar
             name="机器人小R"
             size="46" />
@@ -39,8 +39,8 @@ class ListItems extends Component {
     } = this.props;
     const listItems = dataList && dataList.map((data, index) => {
       let message = data.message;
-      const isInviteUrl = message && /::invite::{"/.test(message);
-      if (isInviteUrl) {
+      const isShareUrl = message && /::share::{"/.test(message);
+      if (isShareUrl) {
         message = '[邀请卡片]';
       }
       const chatFromId = data.to_group_id || (data.user_id && data.user_id.toString());

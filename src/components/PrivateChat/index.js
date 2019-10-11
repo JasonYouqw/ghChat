@@ -6,8 +6,11 @@ import ChatContentList from '../ChatContentList';
 import PersonalInfo from '../PersonalInfo';
 import notification from '../Notification';
 import '../../assets/chat.scss';
-import InviteModal from '../InviteModal';
+import ShareModal from '../ShareModal';
 import Chat from '../../modules/Chat';
+import request from '../../utils/request';
+import debounce from '../../utils/debounce';
+import Button from '../Button';
 
 export default class PrivateChat extends Component {
   constructor() {
@@ -18,12 +21,13 @@ export default class PrivateChat extends Component {
     this._chat = new Chat();
     this.state = {
       showPersonalInfo: false,
-      showInviteModal: false,
-      toUserInfo: {}
+      showShareModal: false,
+      toUserInfo: {},
+      disableJoinButton: false,
     };
   }
 
-  sendMessage = (inputMsg = '', attachments = []) => {
+  sendMessage = async (inputMsg = '', attachments = []) => {
     if (inputMsg.trim() === '' && attachments.length === 0) return;
     const {
       user_id, avatar, name, github_id
@@ -40,18 +44,22 @@ export default class PrivateChat extends Component {
       github_id,
       message: inputMsg === '' ? `${name}: [${attachments[0].type || 'file'}]` : `${name}: ${inputMsg}`, // 消息内容
       attachments, // 附件
-      time: Date.parse(new Date()) / 1000 // 时间
+      // time: Date.parse(new Date()) / 1000 // 时间
     };
     this._sendByMe = true;
-    window.socket.emit('sendPrivateMsg', data);
-    addPrivateChatMessages({
-      allPrivateChats, message: data, chatId: this.friendId
+    const response = await request.socketEmitAndGetResponse('sendPrivateMsg', data, (error) => {
+      notification('消息发送失败', 'error', 2);
     });
-    const dataForHomePage = { ...data, name: location.search.split('=')[1] };
+    addPrivateChatMessages({
+      allPrivateChats, message: response, chatId: this.friendId
+    });
+    const dataForHomePage = { ...response, name: location.search.split('=')[1] };
     updateHomePageList({ data: dataForHomePage, homePageList, myUserId: user_id });
   }
 
-  addAsTheContact =() => {
+  addAsTheContact = async () => {
+    if (this.state.disableJoinButton) return;
+    this.setState({ disableJoinButton: true });
     const {
       allPrivateChats, homePageList,
       updateHomePageList, addPrivateChatInfo,
@@ -60,16 +68,19 @@ export default class PrivateChat extends Component {
       notification('不能添加自己为联系人哦', 'error', 2);
       return;
     }
-    window.socket.emit('addAsTheContact', { user_id: this._userInfo.user_id, from_user: this.friendId }, (data) => {
-      addPrivateChatInfo({ allPrivateChats, chatId: this.friendId, userInfo: data });
-      const dataInHomePageList = {
-        ...data,
-        to_user: data.user_id,
-        message: '添加联系人成功，给我发消息吧:)',
-        time: Date.parse(new Date()) / 1000
-      };
-      updateHomePageList({ data: dataInHomePageList, homePageList });
-    });
+    const data = await request.socketEmitAndGetResponse('addAsTheContact', { user_id: this._userInfo.user_id, from_user: this.friendId },
+      (error) => {
+        notification('添加失败！', 'error', 1.5);
+        this.setState({ disableJoinButton: false });
+      });
+    addPrivateChatInfo({ allPrivateChats, chatId: this.friendId, userInfo: data });
+    const dataInHomePageList = {
+      ...data,
+      to_user: data.user_id,
+      message: '添加联系人成功，给我发消息吧:)',
+      time: Date.parse(new Date()) / 1000
+    };
+    updateHomePageList({ data: dataInHomePageList, homePageList });
   }
 
   _showPersonalInfo(value) {
@@ -90,15 +101,15 @@ export default class PrivateChat extends Component {
     return false;
   }
 
-  _showInviteModal = () => {
-    this.setState(state => ({ showInviteModal: !state.showInviteModal }));
+  _showShareModal = () => {
+    this.setState(state => ({ showShareModal: !state.showShareModal }));
   }
 
   _deletePrivateChat = () => {
     const { deletePrivateChat, allPrivateChats } = this.props;
     deletePrivateChat({ allPrivateChats, chatId: this.chatId })
   }
-  
+
   _deleteHomePageList = () => {
     const { deleteHomePageList, homePageList } = this.props;
     deleteHomePageList({ homePageList, chatId: this.chatId });
@@ -114,36 +125,37 @@ export default class PrivateChat extends Component {
         this.setState({ toUserInfo });
       });
     }
-    this._didMount = true;
   }
 
   render() {
     const {
-      allPrivateChats, location, inviteData,
+      allPrivateChats, location, shareData,
       homePageList, allGroupChats, deleteHomePageList,
-      deletePrivateChat
+      deletePrivateChat, initApp
     } = this.props;
-    const { showPersonalInfo, showInviteModal, toUserInfo } = this.state;
+    const {
+      showPersonalInfo, showShareModal,
+      toUserInfo, disableJoinButton
+    } = this.state;
     if (!allPrivateChats && !allPrivateChats.size) return null;
     const chatItem = allPrivateChats.get(this.chatId);
     const messages = chatItem ? chatItem.messages : [];
     const userInfo = chatItem ? chatItem.userInfo : toUserInfo;
     return (
       <div className="chat-wrapper">
-        <InviteModal
+        <ShareModal
           title="分享此联系人给"
-          modalVisible={showInviteModal}
+          modalVisible={showShareModal}
           chatId={this.chatId}
-          showInviteModal={this._showInviteModal}
-          cancel={this._showInviteModal}
+          showShareModal={this._showShareModal}
+          cancel={this._showShareModal}
           allGroupChats={allGroupChats}
           homePageList={homePageList}
-          clickInviteModalItem={this._chat.clickInviteModalItem}
-         />
+        />
         <ChatHeader
           showPersonalInfo={() => this._showPersonalInfo(true)}
           title={userInfo && userInfo.name || '----'}
-          showInviteModal={this._showInviteModal}
+          showShareModal={this._showShareModal}
           chatType="private"
           showShareIcon={!!chatItem}
         />
@@ -157,24 +169,24 @@ export default class PrivateChat extends Component {
         <PersonalInfo
           userInfo={userInfo}
           hide={() => this._showPersonalInfo(false)}
-          modalVisible={showPersonalInfo} 
+          modalVisible={showPersonalInfo}
           homePageList={homePageList}
           allPrivateChats={allPrivateChats}
           deleteHomePageList={deleteHomePageList}
           deletePrivateChat={deletePrivateChat}
         />
-        { chatItem ? (
+        {chatItem ? (
           <InputArea
-            inviteData={inviteData}
+            shareData={shareData}
             sendMessage={this.sendMessage} />
         )
-          : (
-            <input
-              type="button"
-              onClick={this.addAsTheContact}
-              className="button"
+          : initApp && (
+            <Button
+              clickFn={debounce(this.addAsTheContact, 2000, true)}
               value="加为联系人"
-              />
+              disable={disableJoinButton}
+              className="button"
+            />
           )}
       </div>
     );
@@ -197,9 +209,10 @@ PrivateChat.propTypes = {
   updateHomePageList: PropTypes.func,
   addPrivateChatMessages: PropTypes.func,
   addPrivateChatInfo: PropTypes.func,
-  inviteData: PropTypes.object,
+  shareData: PropTypes.object,
   deleteHomePageList: PropTypes.func,
   deletePrivateChat: PropTypes.func,
+  initApp: PropTypes.bool,
 };
 
 
@@ -210,7 +223,8 @@ PrivateChat.defaultProps = {
   updateHomePageList: undefined,
   addPrivateChatMessages: undefined,
   addPrivateChatInfo: undefined,
-  inviteData: undefined,
-  deleteHomePageList() {},
-  deletePrivateChat() {},
+  shareData: undefined,
+  deleteHomePageList() { },
+  deletePrivateChat() { },
+  initApp: false,
 };

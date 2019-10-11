@@ -23,16 +23,29 @@ export default class Request {
       };
     });
   }
-  // TODO: unify axios request and socket request
-  // static socketEmit(emitName, data) {
-  //   return new Promise((resolve, reject) => {
-  //     try {
-  //       window.socket.emit(emitName, data, (response) => {
-  //         resolve(response);
-  //       });
-  //     } catch (error) {
-  //       reject(error);
-  //     }
-  //   });
-  // }
+
+  static socketEmit(emitName, data, onError) {
+    try {
+      window.socket.emit(emitName, data);
+    } catch (error) {
+      if (onError) {
+        onError(error);
+      }
+    }
+  }
+
+  static socketEmitAndGetResponse(emitName, data, onError) {
+    return new Promise((resolve, reject) => {
+      try {
+        window.socket.emit(emitName, data, (response) => {
+          resolve(response);
+        });
+      } catch (error) {
+        if (onError) {
+          onError(error);
+        }
+        reject(error);
+      }
+    });
+  }
 }

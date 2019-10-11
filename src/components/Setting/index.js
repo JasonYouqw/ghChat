@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import {
   withRouter,
 } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 // import axios from 'axios';
-import UserAvatar from '../UserAvatar';
 import './styles.scss';
 import Button from '../Button';
 import Modal from '../Modal';
@@ -13,7 +13,6 @@ import InitApp from '../../modules/InitApp';
 class Setting extends Component {
   constructor(props) {
     super(props);
-    this._userInfo = JSON.parse(localStorage.getItem('userInfo'));
     this.state = {
       visible: false,
       // githubStars: '--',
@@ -23,8 +22,9 @@ class Setting extends Component {
   componentWillMount() {
     if (!this.props.initializedApp) {
       this._InitApp = new InitApp({ history: this.props.history });
-      this._InitApp.init();
-      this.props.initApp(true);
+      this._InitApp.init().then(() => {
+        this.props.initApp(true);
+      });
     }
   }
 
@@ -49,16 +49,17 @@ class Setting extends Component {
    //    });
    //  }
 
-  _openRepository = () => {
-    window.open('https://github.com/aermin/react-chat');
+  _openUrl = (url) => {
+    window.open(url);
+  }
+
+  get isProduction() {
+    return process.env.NODE_ENV === 'production';
   }
 
   render() {
-    const {
-      name, avatar, github, intro, location, website, company
-    } = this._userInfo;
     const githubStarRender = (
-      <div className="githubStarRender" onClick={this._openRepository}>
+      <div className="githubStarRender" onClick={() => this._openUrl('https://github.com/aermin/ghChat')}>
         <svg className="icon githubIcon" aria-hidden="true">
           <use xlinkHref="#icon-github-copy" />
         </svg>
@@ -79,16 +80,18 @@ class Setting extends Component {
           cancel={this._hideModal}
          />
         {githubStarRender}
-        <UserAvatar name={name} src={avatar} size="60" />
-        <p className="name">{name}</p>
-        <div className="userInfo">
-          {intro && <p>{`介绍: ${intro}`}</p>}
-          {location && <p>{`来自: ${location}`}</p>}
-          {company && <p>{`公司: ${company}`}</p>}
-          {website && <p>{`网站: ${website}`}</p>}
-          {github && <p>{`github: ${github}`}</p>}
-        </div>
-
+        <div className="contact" onClick={() => this._openUrl('https://github.com/aermin/blog/issues/63')}>开启PWA(将ghChat安装到桌面)</div>
+        {this.isProduction ? (
+          <div>
+            {/* <Link className="contact" to="/private_chat/1">联系作者</Link> */}
+            <Link className="contact" to="/group_chat/ddbffd80-3663-11e9-a580-d119b23ef62e">项目交流群</Link>
+          </div>
+        ) : (
+          <div>
+            {/* <div className="contact" onClick={() => this._openUrl('https://im.aermin.top/private_chat/1')}>联系作者</div> */}
+            <div className="contact" onClick={() => this._openUrl('https://im.aermin.top/group_chat/ddbffd80-3663-11e9-a580-d119b23ef62e')}>项目交流群</div>
+          </div>
+        )}
         <Button clickFn={this._showModal} value="退出登录" />
       </div>
     );

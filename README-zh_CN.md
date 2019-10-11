@@ -1,5 +1,8 @@
 ![ghChat](https://user-images.githubusercontent.com/24861316/54087066-55783580-438a-11e9-9a5d-14288e84a3f9.png)
 
+Node 版本: 8.12.0
+Npm 版本: 6.4.1
+MySQL 版本: 5.7.22
 
 [English](./README.md) | 简体中文
 
@@ -9,14 +12,14 @@
 
 ### 地址
 
-[github项目地址](https://github.com/aermin/react-chat)。***富应用型的开发很耗时间精力，觉得还不错的麻烦给个star鼓励下ʘᴗʘ*** 
+[github项目地址](https://github.com/aermin/ghChat)。***富应用型的开发很耗时间精力，觉得还不错的麻烦给个star鼓励下ʘᴗʘ*** 
 
 
 [应用线上地址(也是项目的群链接)，支持直接github授权登录](https://im.aermin.top/group_chat/ddbffd80-3663-11e9-a580-d119b23ef62e)
 
 ### 技术栈
 
-前端React全家桶，后端node.js(koa2), 数据库MySQL, 双向通信SocKet.io, jwt鉴权等等。具体看package.json。有疑问的可以加ghChat群交流哦，我每天都在线，也可以私聊我，[点击加我](https://im.aermin.top/private_chat/1)
+前端React全家桶，后端node.js(koa2)和写了些TS, 数据库MySQL, 双向通信SocKet.io, jwt鉴权等等。具体看package.json。有疑问的可以加ghChat群交流哦，我每天都在线，也可以私聊我，[点击加我](https://im.aermin.top/private_chat/1)
 
 ### 项目展示：
 
@@ -96,8 +99,8 @@
   - [x] gzip 压缩
   - [x] 聊天内容懒加载，每次获取20条数据
   - [x] 路由按需加载
-  - [x] 接口请求频率限制 
-  - [ ] css文件单独打包  
+  - [x] 接口请求频率限制
+  - [ ] css文件单独打包
   - [ ] sql优化
 
 - 其他
@@ -105,8 +108,9 @@
   - [x] 机器人智能聊天回复
   - [x] 部署SSL证书
   - [x] 支持PWA
+  - [x] 后端用TS重写
+  - [ ] 后端封装成sdk
   - [ ] 国际化
-  - [ ] 后端用TS重写，封装成sdk
   - [ ] CI/CD
 
 ### 项目结构图
@@ -115,68 +119,120 @@
 ├── LICENSE
 ├── README-zh_CN.md
 ├── README.md
-├── build
 ├── package-lock.json
 ├── package.json
 ├── postcss.config.js
-├── secret.js // 放一些非公开的secret
-├── server  // 后端代码
-│   ├── config.js
-│   ├── controllers
-│   ├── ecosystem.config.js // pm2加生产环境变量的配置文件
-│   ├── gulpfile.js
-│   ├── index.js
-│   ├── init  // 初始化mysql
-│   ├── middlewares
-│   ├── models
-│   ├── package-lock.json
-│   ├── package.json
-│   ├── routes  // 后端路由，跟登录注册模块有关
-│   ├── socket  // 除了登录注册，其他都用socket 来通信
-│   ├── utils
-│   └── yarn.lock
-├── src  // 前端代码
-│   ├── App.js
-│   ├── app.scss
-│   ├── assets
-│   ├── components
-│   ├── containers
-│   ├── index.html
-│   ├── index.js
-│   ├── manifest.json // PWA需要
-│   ├── modules
-│   ├── redux
-│   ├── router
-│   ├── service-worker.js // PWA需要
-│   └── utils
+├── server // 后端代码
+│   ├── ecosystem.config.js
+│   ├── init // 初始化mysql数据库的脚本
+│   ├── nodemon.json
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── secrets.ts // 放一些非公开的secret
+│   ├── src
+│     ├── app
+│     ├── context
+|     ├── controllers
+|     ├── index.ts
+|     ├── middlewares
+|     ├── routes // 后端路由，跟登录注册模块有关
+|     ├── server.ts
+|     ├── services
+|     ├── socket // 除了登录注册，其他都用socket 来通信
+|     └── utils
+|     ├── configs
+|       ├── configs.common.ts // 后端通用配置
+|       ├── configs.dev.ts // 后端开发配置
+|       └── configs.prod.ts // 后端生产配置
+    └── main.ts
+│   ├── tsconfig.json
+│   ├── tslint.json
+│   └── webpack.config.js
+├── src // 前端代码
+│   ├── App.js
+│   ├── app.scss
+│   ├── assets
+│   ├── components
+│   ├── containers
+│   ├── index.html
+│   ├── index.js
+│   ├── manifest.json // PWA需要
+│   ├── modules
+│   ├── redux
+│   ├── router
+│   ├── service-worker.js // PWA需要
+│   └── utils
 ├── webpack.common.config.js  // 通用webpack设置
-├── webpack.config.js  //生产相关的webpack配置
-├── webpack.dev.config.js  //开发相关的webpack配置
+├── webpack.config.js //生产相关的webpack配置
+└── webpack.dev.config.js //开发相关的webpack配置
 ```
 
 ### 本地开发
 
 1. 项目拉到本地
 ```
-git clone https://github.com/aermin/react-chat.git
+git clone https://github.com/aermin/ghChat.git
 ```
 
-
-2. 在react-chat文件夹下创建一个secret.js的空白文件。
-
-如果要使用github授权登录，使用七牛云cdn，生产环境数据库和jwt的secret的单独配置，就要填充相应的配置了。
+2. 下载前端的npm包
 ```
-module.exports = {
-  client_secret: '', // github授权登录需要的  github-> settings ->  Developer settings 那边生成获取
-  db: {
+cd ghChat
+```
+
+```
+npm i
+```
+
+3. 下载后端的npm包
+```
+cd ghChat/server
+```
+
+```
+npm i
+```
+
+4. 初始化数据库
+
+```
+//需要先在本地建一个名为ghchat的mysql数据库
+数据库配置参考如下(ghChat/server/src/configs/configs.dev.ts) 的dbConnection
+
+npm run init_sql    //然后查看下数据库是否init成功
+```
+
+ps: 如果要使用github授权登录，发图片和发文件(使用七牛云cdn)，就要在文件(ghChat/server/src/configs/configs.dev.ts)填充相应的配置了，否则默认无法使用
+
+
+5. 跑起前端和后端的代码
+```
+npm run start
+```
+
+```
+cd ..      // 返回到ghChat/目录
+```
+
+```
+npm run start
+```
+
+### 生产环境使用
+
+前提：创建secrets.ts文件
+```
+export default {
+  port: '3000', // server 端口
+  dbConnection: {
     host: '', // 数据库IP
-    port: , // 数据库端口
-    database: '', // 数据库名称
+    port: 3306, // 数据库端口
+    database: 'ghchat', // 数据库名称
     user: '', // 数据库用户名
     password: '', // 数据库密码
   },
-  secretValue: '', // json web token 的 secret
-  qiniu: { // 七牛云配置
+  client_secret: '', // github的client_secret
+  jwt_secret: '', // jwt的secret
+  qiniu: { // 七牛云cdn配置
     accessKey: '',
     secretKey: '',
     bucket: ''
@@ -184,46 +240,21 @@ module.exports = {
 };
 ```
 
-3. 下载前端的npm包
-```
-cd react-chat
-```
+1.build前端代码
 
 ```
-npm i
+cd src
+npm run build:prod
 ```
 
-4. 下载后端的npm包
-```
-cd cd react-chat/server 
-```
+2.build后端代码
 
 ```
-npm i
+cd sever
+npm run build:prod
 ```
-
-5. 初始化数据库
-```
-//需要先在本地建一个名为ghchat的mysql数据库
-配置如下看react-chat/server/config.js
-
-npm run init_sql    //然后查看下数据库是否init成功
-```
-
-6. 跑起前端和后端的代码
-```
-npm run start
-```
-
-```
-cd ..      // 返回到react-chat/目录
-```
-
-```
-npm run start
-```
-
-ps: 本地发图片和发文件和github登录无法使用，需要自己去github和七牛云申请一些东西
+3. 把步骤1，2产生的文件夹(build, dist)放到你的服务器上, 把dist/index.js文件跑起来
+(可以把ghChat/package.json，ghChat/server/ecosystem.config.js 两个文件一并拷到到你的服务器上，然后执行`npm run start:prod`)
 
 ### 文档
 
@@ -235,3 +266,10 @@ ps: 本地发图片和发文件和github登录无法使用，需要自己去gith
 [MIT](https://opensource.org/licenses/MIT)
 
 ***码代码不易，引用借鉴请注明出处***
+
+### Contributors
+
+<a href="https://github.com/aermin"><img src="https://avatars2.githubusercontent.com/u/24861316?s=460&v=4" width="60" height="60" /></a>
+<a href="https://github.com/AbbyJL"><img src="https://avatars2.githubusercontent.com/u/33203948?s=400&v=4" width="60" height="60" /></a>
+<a href="https://github.com/ZouYouShun"><img src="https://avatars0.githubusercontent.com/u/5878538?s=400&v=4" width="60" height="60" /></a>
+<a href="https://github.com/blackmatch"><img src="https://avatars1.githubusercontent.com/u/12443954?s=400&v=4" width="60" height="60" /></a>

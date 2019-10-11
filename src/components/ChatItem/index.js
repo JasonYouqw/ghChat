@@ -5,6 +5,7 @@ import {
 import PropTypes from 'prop-types';
 import { Emoji } from 'emoji-mart';
 import { MultiLineParser } from 'text-emoji-parser';
+import Linkify from '../Linkify';
 import UserAvatar from '../UserAvatar';
 import './style.scss';
 import Chat from '../../modules/Chat';
@@ -16,7 +17,7 @@ class ChatItem extends Component {
     this._chat = new Chat();
   }
 
-  clickToInvite({ redirectUrl }) {
+  clickToShare({ redirectUrl }) {
     this.props.history.push(redirectUrl);
   }
 
@@ -24,37 +25,37 @@ class ChatItem extends Component {
     this.props.clickImage(imageUrl);
   }
 
-  invitePersonalCard = (inviteObj) => {
-    const { name, avatar, user_id } = inviteObj;
+  sharePersonalCard = (shareObj) => {
+    const { name, avatar, user_id } = shareObj;
     const redirectUrl = `/private_chat/${user_id}`;
     return (
       <div
-        className="inviteCard"
-        onClick={() => { this.clickToInvite({ redirectUrl }); }}
+        className="shareCard"
+        onClick={() => { this.clickToShare({ redirectUrl }); }}
         >
-        <p className="inviteTitle">
+        <p className="shareTitle">
           {` "${decodeURI(name)}"`}
         </p>
-        <p className="inviteButton">点击加为联系人</p>
+        <p className="shareButton">点击加为联系人</p>
       </div>
     );
   }
 
-  inviteGroupCard = (inviteObj) => {
-    const { name, to_group_id } = inviteObj;
+  shareGroupCard = (shareObj) => {
+    const { name, to_group_id } = shareObj;
     const redirectUrl = `/group_chat/${to_group_id}`;
     return (
       <div
-        className="inviteCard"
-        onClick={() => { this.clickToInvite({ redirectUrl }); }}
+        className="shareCard"
+        onClick={() => { this.clickToShare({ redirectUrl }); }}
         >
         <p>
           邀请你加入群:
         </p>
-        <p className="inviteTitle">
+        <p className="shareTitle">
           {` "${decodeURI(name)}"`}
         </p>
-        <p className="inviteButton">点击加入</p>
+        <p className="shareButton">点击加入</p>
       </div>
     );
   }
@@ -72,31 +73,34 @@ class ChatItem extends Component {
   }
 
   textRender = (msg) => {
-    const isInviteUrl = /^::invite::{"/.test(msg);
-    if (isInviteUrl) {
-      const inviteObj = JSON.parse(msg.replace(/::invite::/, ''));
-      if (inviteObj.to_group_id) {
-        return <div className="msg-render">{this.inviteGroupCard(inviteObj)}</div>;
-      } if (inviteObj.user_id) {
-        return <div className="msg-render">{this.invitePersonalCard(inviteObj)}</div>;
+    const isShareUrl = /^::share::{"/.test(msg);
+    if (isShareUrl) {
+      const shareObj = JSON.parse(msg.replace(/::share::/, ''));
+      if (shareObj.to_group_id) {
+        return <div className="msg-render">{this.shareGroupCard(shareObj)}</div>;
+      } if (shareObj.user_id) {
+        return <div className="msg-render">{this.sharePersonalCard(shareObj)}</div>;
       }
     }
+
     return (
       <div className="msg-render">
-        {MultiLineParser(msg,
-          {
-            SplitLinesTag: 'p',
-            Rule: /(?:\:[^\:]+\:(?:\:skin-tone-(?:\d)\:)?)/gi
-          },
-          (Rule, ruleNumber) => (
-            <Emoji
-              className="msg-render"
-              emoji={Rule}
-              backgroundImageFn={() => 'https://cdn.aermin.top/emojione.png'}
-              size={26}
-              fallback={(emoji, props) => (emoji ? `:${emoji.short_names[0]}:` : props.emoji)} />
-          ))
-    }
+        <Linkify>
+          {MultiLineParser(msg,
+            {
+              SplitLinesTag: 'p',
+              Rule: /(?:\:[^\:]+\:(?:\:skin-tone-(?:\d)\:)?)/gi
+            },
+            (Rule, ruleNumber) => (
+              <Emoji
+                className="msg-render"
+                emoji={Rule}
+                backgroundImageFn={() => 'https://cdn.aermin.top/emojione.png'}
+                size={26}
+                fallback={(emoji, props) => (emoji ? `:${emoji.short_names[0]}:` : props.emoji)} />
+            ))
+          }
+        </Linkify>
       </div>
     );
   };

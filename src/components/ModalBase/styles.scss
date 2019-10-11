@@ -1,4 +1,5 @@
-.mask {
+.modal {
+  .mask {
     position: fixed;
     width: 100%;
     height: 100%;
@@ -7,20 +8,14 @@
     background-color: #000;
     opacity: 0.3;
     z-index: 998;
-}
+  }
 
-.modalWrapper {
+  .modalWrapper {
     position: fixed;
     min-width: 30%;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);    //TODO 使用插件来自动做兼容 
-    -moz-transform: translate(-50%, -50%);
-    //Mozilla内核浏览器：firefox3.5+
-    -webkit-transform: translate(-50%, -50%); //Webkit内核浏览器：Safari and Chrome
-    -o-transform: translate(-50%, -50%); //Opera
-    -ms-transform: translate(-50%, -50%); //IE9    
-    height: auto;
+    transform: translate(-50%, -50%);    //TODO 使用插件来自动做兼容    
     background-color: white;
     border-radius: 8px;
     border-top: 1px solid white;
@@ -34,4 +29,13 @@
       position: absolute;
       right: 0px;
     }
+  }
+}
+
+.showModalBase {
+  position: absolute;
+}
+
+.hideModalBase {
+  display: none;
 }

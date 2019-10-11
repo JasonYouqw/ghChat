@@ -1,5 +1,8 @@
 ![ghChat](https://user-images.githubusercontent.com/24861316/54087066-55783580-438a-11e9-9a5d-14288e84a3f9.png)
 
+Node version: 8.12.0
+Npm version: 6.4.1
+MySQL version: 5.7.22
 
 English | [简体中文](./README-zh_CN.md)
 
@@ -11,7 +14,7 @@ If you have anything idea about integration, welcome to create issues about feat
 
 ### Address
 
-[GitHub address](https://github.com/aermin/react-chat)
+[GitHub address](https://github.com/aermin/ghChat)
 
 [Project online address(also this project's group address)，support logging in with GitHub authorization](https://im.aermin.top/group_chat/ddbffd80-3663-11e9-a580-d119b23ef62e)
 
@@ -21,8 +24,8 @@ Welcome to [ click this link](https://im.aermin.top/private_chat/1) to contact m
 ### What technology do ghChat use?
 
 Front-End : React+Redux+React-router+axios+scss；
-Back-end: node(koa2)+mysql+JWT(Json web token); 
-use socket.io to send messages with each other. 
+Back-end: node(koa2)+mysql+JWT(Json web token);
+use socket.io to send messages with each other.
 And get other technology please follow the package.json file.
 
 ### Demo with photo：
@@ -112,33 +115,76 @@ Just some functions
   - [x] Robot smart reply (just support Chinese)
   - [x] Add SSL for website
   - [x] PWA
+  - [x] Rewrite back end code with TS
   - [ ] Multilingual solution with I18
-  - [ ] Rewrite back end code with TS，encapsulated as sdk.
+  - [ ] encapsulate back end code as sdk.
   - [ ] CI/CD
 
 ### Development
 
 1. clone project code
 ```
-git clone https://github.com/aermin/react-chat.git
+git clone https://github.com/aermin/ghChat.git
 ```
 
-
-2.  create an empty file which names 'secret.js' in the root directory of this project.
-
-But if you want to log in with GitHub authorization, use third part cdn to send files in chat, or separate configuration for DB, jwt secret, you should add content as follows in secret.js. So without this authorization, you just can't use features about send files and log in with GitHub.
+2. download npm module for front end
 
 ```
-module.exports = {
-  client_secret: '', // client_secret of github authorization:  github-> settings ->  Developer settings to get 
-  db: {
-    host: '', 
-    port: ,
-    database: '',
-    user: '',
-    password: '',
+cd ghChat
+```
+
+```
+npm i
+```
+
+3. download npm module for the back end
+```
+cd ghChat/server
+```
+
+```
+npm i
+```
+
+4. init DB
+```
+// You should create a MySQL DB which name ghchat in local
+DB configuration follows 'ghChat/server/src/configs/configs.dev.ts'
+
+npm run init_sql // then check if it inits successfully
+```
+ps: if you want to use github authorization to log in and use qiniu cdn which provides storage to send photo and file, you should follow the file(ghChat/server/src/configs/configs.dev.ts) to configure. The default won't be able to use.
+
+
+5. run front end and back end code
+```
+npm run start
+```
+
+```
+cd ..
+```
+
+```
+npm run start
+```
+
+### use in production
+
+Premise: pls create secrets.ts file to do configuration
+
+```
+export default {
+  port: '3000', // server port
+  dbConnection: {
+    host: '', // 数据库IP
+    port: 3306, // 数据库端口
+    database: 'ghchat', // 数据库名称
+    user: '', // 数据库用户名
+    password: '', // 数据库密码
   },
-  secretValue: '', // secret of json web token
+  client_secret: '', // client_secret of github authorization:  github-> settings ->  Developer settings to get
+  jwt_secret: '', // secret of json web token
   qiniu: { // qiniu cdn configuration
     accessKey: '',
     secretKey: '',
@@ -147,48 +193,32 @@ module.exports = {
 };
 ```
 
-3. download npm module for front end
+1.build front end code
 
 ```
-cd react-chat
+cd src
+npm run build:prod
 ```
 
-```
-npm i
-```
-
-4. download npm module for back end
-```
-cd cd react-chat/server 
-```
+2.build server code
 
 ```
-npm i
+cd sever
+npm run build:prod
 ```
 
-5. init DB
-```
-// You should create a MySQL DB which name ghcaht in local
-DB configuration follows 'react-chat/server/config.js'
-
-npm run init_sql
-```
-
-6. run front end and back end code
-```
-npm run start
-```
-
-```
-cd ..  
-```
-
-```
-npm run start
-```
+3. put the folders(build, dist) which built from step1, step2 into you server, and run dist/index.js file
+(here you can copy ghChat/package.json，ghChat/server/ecosystem.config.js two files to your sever as well，and run command `npm run start:prod`)
 
 ### License
 
 [MIT](https://opensource.org/licenses/MIT)
 
 ***Please indicate the source if you use the code of this project***
+
+### Contributors
+
+<a href="https://github.com/aermin"><img src="https://avatars2.githubusercontent.com/u/24861316?s=460&v=4" width="60" height="60" /></a>
+<a href="https://github.com/AbbyJL"><img src="https://avatars2.githubusercontent.com/u/33203948?s=400&v=4" width="60" height="60" /></a>
+<a href="https://github.com/ZouYouShun"><img src="https://avatars0.githubusercontent.com/u/5878538?s=400&v=4" width="60" height="60" /></a>
+<a href="https://github.com/blackmatch"><img src="https://avatars1.githubusercontent.com/u/12443954?s=400&v=4" width="60" height="60" /></a>
