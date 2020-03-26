@@ -1,4 +1,5 @@
 import notification from '../../components/Notification';
+import store from '../../redux/store';
 
 export default class BrowserNotification {
   constructor() {
@@ -17,7 +18,7 @@ export default class BrowserNotification {
       return;
     }
     if (this.permission && this.permission !== 'denied') {
-      this.notification.requestPermission((status) => {
+      this.notification.requestPermission(status => {
         if (this.permission !== status) {
           this.permission = status;
         }
@@ -28,10 +29,11 @@ export default class BrowserNotification {
     }
   }
 
-  notify({
-    title, text, icon, onClick, audio
-  }) {
-    if (!this._notificationEnable) {
+  notify({ title, text, icon, onClick, audio }) {
+    const {
+      globalSettingsState: { notification },
+    } = store.getState();
+    if (!this._notificationEnable || !notification) {
       return;
     }
     const n = new window.Notification(title, { body: text, icon });
@@ -43,10 +45,10 @@ export default class BrowserNotification {
   }
 
   _onPlay(src) {
-    let audio = document.createElement("audio");
+    const audio = document.createElement('audio');
     audio.setAttribute('src', src);
     audio.play();
- }
+  }
 
   get permission() {
     return this.notification.permission;
@@ -59,7 +61,7 @@ export default class BrowserNotification {
   }
 
   get hasPermission() {
-    return this.permission && (this.permission === 'granted');
+    return this.permission && this.permission === 'granted';
   }
 
   get notification() {

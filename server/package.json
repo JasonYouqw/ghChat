@@ -1,23 +1,22 @@
 {
-  "name": "react-chat",
+  "name": "ghChat",
   "version": "1.0.0",
-  "description": "server of react-chat",
+  "description": "server of ghChat",
   "author": "aermin <aermin@qq.com>",
   "private": true,
   "scripts": {
     "clean": "rimraf package-lock.json node_modules",
-    "cleanAndUpdate": "npm run clean && ncu -a &&  ncu -d -a && npm install",
-    "start": "npm run watch",
-    "watch": "concurrently -k -p \"[{name}]\" -n \"Node,TypeScript\" -c \"green.bold,cyan.bold,green.bold\" \"nodemon\" \"npm run watch-build\"",
-    "serve": "nodemon",
+    "cleanAndUpdate": "npm run clean && ncu -a && ncu -d -a && npm install",
+    "start": "npm run build && npm run watch",
+    "watch": "concurrently -k -p \"[{name}]\" -n \"Node,TypeScript\" -c \"green.bold,cyan.bold,green.bold\" \"npm run runWithNodemon\" \"npm run watch-build\"",
+    "runWithNodemon": "nodemon --delay 80ms node --inspect=0.0.0.0:9229 ./dist/index.js",
     "clean-dist": "rimraf dist",
     "build": "npm run clean-dist && webpack --config webpack.config.js --progress --colors",
-    "watch-build": "npm run clean-dist && webpack --config webpack.config.js --progress --colors -w",
+    "watch-build": "webpack --config webpack.config.js --progress --colors -w",
     "init_sql": "ts-node-dev --respawn --transpileOnly ./init/index.ts ",
-    "dev": "node --inspect ../server",
     "build:prod": "npm run clean-dist && webpack --config webpack.config.js --progress --colors --prod",
-    "start:prod": "pm2 start ecosystem.config.js --env production",
-    "stop:prod": "pm2 stop ecosystem.config.js --env production"
+    "start:prod": "pm2 start ./dist/index.js --env production",
+    "stop:prod": "pm2 stop ./dist/index.js --env production"
   },
   "engines": {
     "node": ">= 0.10.0"
@@ -40,7 +39,6 @@
     "request-promise": "^4.2.2",
     "socket.io": "^2.0.3",
     "typescript": "^3.4.3",
-    "ts-node-dev": "^1.0.0-pre.43",
     "uuid": "^3.2.1",
     "winston": "^3.2.1"
   },
@@ -64,8 +62,9 @@
     "awesome-typescript-loader": "^5.2.1",
     "concurrently": "^4.1.0",
     "dotenv": "^7.0.0",
-    "nodemon": "^1.18.9",
+    "nodemon": "^1.19.0",
     "ts-loader": "^5.3.3",
+    "ts-node-dev": "^1.0.0-pre.43",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1",
     "webpack-node-externals": "^1.7.2"

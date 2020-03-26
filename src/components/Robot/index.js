@@ -5,9 +5,7 @@ import ChatHeader from '../ChatHeader';
 import ChatItem from '../ChatItem';
 import InputArea from '../InputArea';
 
-import {
-  toNormalTime
-} from '../../utils/transformTime';
+import { toNormalTime } from '../../utils/transformTime';
 
 export default class Robot extends Component {
   constructor() {
@@ -18,35 +16,29 @@ export default class Robot extends Component {
     };
   }
 
-  scrollToBottom(time = 0) {
-    const ulDom = document.getElementsByClassName('chat-content-list')[0];
-    setTimeout(() => {
-      ulDom.scrollTop = ulDom.scrollHeight + 10000;
-    }, time);
-  }
-
-  sendMessage = async (value) => {
-    this.setState({
-      inputMsg: value
-    }, async () => {
-      const { insertMsg, getRobotMsg } = this.props;
-      const { inputMsg } = this.state;
-      insertMsg(
-        { message: inputMsg }
-      );
-      this.scrollToBottom();
-      await getRobotMsg(
-        {
+  sendMessage = async value => {
+    this.setState(
+      {
+        inputMsg: value,
+      },
+      async () => {
+        const { insertMsg, getRobotMsg } = this.props;
+        const { inputMsg } = this.state;
+        insertMsg({ message: inputMsg });
+        await getRobotMsg({
           message: inputMsg,
-          user_id: this._userInfo.user_id
-        }
-      );
-      this.scrollToBottom();
-    });
-  }
+          user_id: this._userInfo.user_id,
+        });
+      },
+    );
+  };
 
   componentDidMount() {
-    this.scrollToBottom(200);
+    this.scrollBottomRef.scrollIntoView();
+  }
+
+  componentDidUpdate() {
+    this.scrollBottomRef.scrollIntoView();
   }
 
   shouldComponentUpdate(nextProps) {
@@ -65,7 +57,8 @@ export default class Robot extends Component {
           <ChatItem
             msg={msg.message}
             name={msg.user}
-            time={toNormalTime(Date.parse(new Date()) / 1000)} />
+            time={toNormalTime(Date.parse(new Date()) / 1000)}
+          />
         )}
         {!msg.user && (
           <ChatItem
@@ -73,7 +66,8 @@ export default class Robot extends Component {
             img={this._userInfo.avatar}
             msg={msg.message}
             name={this._userInfo.name}
-            time={toNormalTime(Date.parse(new Date()) / 1000)} />
+            time={toNormalTime(Date.parse(new Date()) / 1000)}
+          />
         )}
       </li>
     ));
@@ -82,6 +76,12 @@ export default class Robot extends Component {
         <ChatHeader title="机器人聊天" chatType="robot" />
         <ul className="chat-content-list">
           {listItems}
+          <div
+            style={{ float: 'left', clear: 'both' }}
+            ref={el => {
+              this.scrollBottomRef = el;
+            }}
+          />
         </ul>
         <InputArea sendMessage={this.sendMessage} isRobotChat />
       </div>

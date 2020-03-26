@@ -1,8 +1,9 @@
 @import "../../assets/base.scss";
 .tabs-wrapper{
-    background-color: $gray-tab;
+    background-color: $grayTab;
     align-items: center;
     text-align: center;
+    z-index: 99;
     .tab .icon{
         font-size: 44px;
         padding: 6px;

@@ -12,29 +12,44 @@ export default class SignInSignUp extends Component {
     this.state = {
       name: '',
       password: '',
-      showSpinner: true
+      showSpinner: true,
     };
   }
 
-  handleChange = (event) => {
+  handleChange = event => {
     const { target } = event;
     this.setState({ [target.name]: target.value });
-  }
+  };
 
   async loginGithub() {
     const href = window.location.href;
     if (/\/login\?code/.test(href)) {
       const code = href.split('?code=')[1];
-      const response = await Request.axios('post', '/api/v1/github_oauth', { code, clientId: this.clientId });
-      localStorage.setItem('userInfo', JSON.stringify(response));
-      window.location.reload();
-      const originalLink = sessionStorage.getItem('originalLink');
-      if (originalLink) {
-        sessionStorage.removeItem('originalLink');
-        window.location.href = originalLink;
-        return;
-      }
-      window.location.href = '/';
+      Request.axios('post', '/api/v1/github_oauth', {
+        code,
+        clientId: this.clientId,
+      })
+        .then(response => {
+          localStorage.setItem('userInfo', JSON.stringify(response));
+          window.location.reload();
+          const originalLink = sessionStorage.getItem('originalLink');
+          if (originalLink) {
+            sessionStorage.removeItem('originalLink');
+            window.location.href = originalLink;
+            return;
+          }
+          window.location.href = '/';
+        })
+        .catch(error => {
+          console.log(
+            '使用github登录前请确定你的github设置了public的email，否则可能会失败 error => ',
+            error,
+          );
+          window.open(
+            'https://user-images.githubusercontent.com/24861316/75133098-6b564600-5714-11ea-824a-b367ed55b1a1.png',
+          );
+          window.location.href = '/login';
+        });
     }
   }
 
@@ -46,7 +61,7 @@ export default class SignInSignUp extends Component {
 
   handleClick = () => {
     this.props.setValue(this.state);
-  }
+  };
 
   get clientId() {
     return '8c694af835d62f8fd490';
@@ -82,7 +97,7 @@ export default class SignInSignUp extends Component {
             value={name}
             onChange={this.handleChange}
             placeholder="用户名"
-              />
+          />
         </div>
         <div className="center">
           <input
@@ -91,36 +106,29 @@ export default class SignInSignUp extends Component {
             value={password}
             onChange={this.handleChange}
             placeholder="密码"
-              />
+          />
         </div>
         <div className="center">
-          <input
-            type="button"
-            onClick={this.handleClick}
-
-            value={buttonName}
-              />
+          <input type="button" onClick={this.handleClick} value={buttonName} />
         </div>
         <div className="center">
+          <p className="authTips">推荐使用GitHub登录</p>
           <a className="githubOAuth" href={OAuthHref}>
             <svg className="icon githubIcon" aria-hidden="true">
               <use xlinkHref="#icon-github" />
             </svg>
           </a>
         </div>
-
-
+        <div className="version">Version: 2.5.5</div>
       </div>
     );
   }
 }
 
-
 SignInSignUp.propTypes = {
   setValue: PropTypes.func,
-  isLogin: PropTypes.bool
+  isLogin: PropTypes.bool,
 };
-
 
 SignInSignUp.defaultProps = {
   setValue() {},

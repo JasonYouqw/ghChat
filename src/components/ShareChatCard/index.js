@@ -1,29 +1,28 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ShareModal from '../ShareModal';
-import './styles.scss';
 
 class ShareChatCard extends Component {
   state = {
     showShareModal: false,
-  }
+  };
 
   _showShareModal = () => {
     this.props.hideOtherModal();
     this.setState(state => ({ showShareModal: !state.showShareModal }));
-  }
+  };
 
   _closeShareModal = () => {
     this.setState({ showShareModal: false });
-  }
+  };
 
   render() {
-    const {
-      allGroupChats, homePageList, title, chatId
-    } = this.props;
+    const { allGroupChats, homePageList, title, chatId } = this.props;
     return (
       <div>
-        <svg onClick={this._showShareModal} className="icon shareIcon" aria-hidden="true"><use xlinkHref="#icon-share" /></svg>
+        <svg onClick={this._showShareModal} className="icon shareIcon" aria-hidden="true">
+          <use xlinkHref="#icon-share" />
+        </svg>
         <ShareModal
           title={title}
           modalVisible={this.state.showShareModal}
@@ -31,7 +30,7 @@ class ShareChatCard extends Component {
           cancel={this._closeShareModal}
           allGroupChats={allGroupChats}
           homePageList={homePageList}
-      />
+        />
       </div>
     );
   }

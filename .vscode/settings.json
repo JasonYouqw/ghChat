@@ -11,6 +11,6 @@
     "**/.DS_Store": true,
     "build/**": true
   },
-  "eslint.autoFixOnSave": false,
-  "files.eol": "\n"
+  "eslint.autoFixOnSave": true,
+  "files.eol": "\n",
 }
